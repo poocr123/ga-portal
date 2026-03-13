@@ -4,533 +4,110 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GA 지점장 업무 포털</title>
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="GA 포털">
-  <link rel="apple-touch-icon" href="/icon-192.png">
-  <meta name="theme-color" content="#3b82f6">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GA 포털">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="theme-color" content="#3b82f6">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c8b7356a37d3cc3bdab19f268534de9a&libraries=services"></script>
 <style>
-  :root {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --surface2: #1a2235;
-    --border: #1e2d45;
-    --accent: #3b82f6;
-    --accent2: #06b6d4;
-    --gold: #f59e0b;
-    --text: #e2e8f0;
-    --text-muted: #64748b;
-    --success: #10b981;
-    --danger: #ef4444;
-    --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    width: 220px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
-  }
-
-  .logo {
-    padding: 28px 24px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo-badge {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-bottom: 8px;
-  }
-
-  .logo h1 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.4;
-  }
-
-  .logo p {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  nav { padding: 16px 12px; flex: 1; }
-
-  .nav-section {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-    padding: 12px 12px 6px;
-    text-transform: uppercase;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: all .2s;
-    margin-bottom: 2px;
-  }
-
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: rgba(59,130,246,0.15); color: var(--accent); }
-  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-
-  .nav-item .badge {
-    margin-left: auto;
-    background: var(--accent);
-    color: white;
-    font-size: 10px;
-    padding: 1px 6px;
-    border-radius: 10px;
-  }
-
-  .sidebar-footer {
-    padding: 16px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text-muted);
-    text-align: center;
-  }
-
-  /* ── MAIN ── */
-  .main {
-    margin-left: 220px;
-    min-height: 100vh;
-  }
-
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-
-  .topbar-title { font-size: 16px; font-weight: 700; }
-  .topbar-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .content { padding: 32px; }
-
-  /* ── PAGE ── */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* ── DASHBOARD ── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
-
-  .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px; }
-  .stat-value { font-size: 28px; font-weight: 900; margin: 8px 0 4px; font-family: 'DM Mono', monospace; }
-  .stat-sub { font-size: 11px; color: var(--success); }
-
-  .welcome-banner {
-    background: linear-gradient(135deg, #1e3a5f 0%, #0f2042 100%);
-    border: 1px solid #2a4a7f;
-    border-radius: 16px;
-    padding: 32px;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .welcome-banner::after {
-    content: '📋';
-    position: absolute;
-    right: 32px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 64px;
-    opacity: 0.2;
-  }
-
-  .welcome-banner h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .welcome-banner p { color: #93bbff; font-size: 14px; line-height: 1.6; }
-
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-
-  .tool-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    cursor: pointer;
-    transition: all .25s;
-  }
-
-  .tool-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(59,130,246,0.15);
-  }
-
-  .tool-icon { font-size: 32px; margin-bottom: 12px; }
-  .tool-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-  .tool-card p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-  .tool-status {
-    display: inline-block;
-    margin-top: 12px;
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-weight: 600;
-  }
-  .tool-status.ready { background: rgba(16,185,129,0.15); color: var(--success); }
-  .tool-status.soon { background: rgba(245,158,11,0.15); color: var(--gold); }
-
-  /* ── ROUTE TOOL ── */
-  .route-layout {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 20px;
-    height: calc(100vh - 160px);
-  }
-
-  .route-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .panel-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .panel-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
-
-  .form-group { margin-bottom: 14px; }
-  .form-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-    display: block;
-    text-transform: uppercase;
-  }
-
-  .form-input, .form-select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: 'Noto Sans KR', sans-serif;
-    transition: border-color .2s;
-  }
-
-  .form-input:focus, .form-select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .form-input::placeholder { color: var(--text-muted); }
-
-  .btn {
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: none;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Noto Sans KR', sans-serif;
-    transition: all .2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: white;
-  }
-  .btn-primary:hover { background: #2563eb; }
-
-  .btn-success {
-    background: var(--success);
-    color: white;
-  }
-  .btn-success:hover { background: #059669; }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
-
-  .btn-danger-ghost {
-    background: transparent;
-    color: var(--danger);
-    border: none;
-    padding: 4px 8px;
-    font-size: 11px;
-  }
-
-  .btn-full { width: 100%; justify-content: center; }
-
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 16px 0;
-  }
-
-  /* Agency list */
-  .agency-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: fadeIn .3s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .agency-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .agency-info { flex: 1; min-width: 0; }
-  .agency-name { font-size: 13px; font-weight: 600; }
-  .agency-addr { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-  .agency-tag {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 10px;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
-
-  .tag-edu { background: rgba(245,158,11,0.15); color: var(--gold); }
-  .tag-visit { background: rgba(59,130,246,0.15); color: var(--accent); }
-
-  /* Result */
-  .result-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .result-header {
-    background: rgba(59,130,246,0.1);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .result-item {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-  }
-
-  .result-item:last-child { border-bottom: none; }
-
-  .result-num {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .num-start { background: var(--gold); color: #000; }
-  .num-route { background: var(--accent); color: white; }
-
-  .result-info { flex: 1; }
-  .result-name { font-weight: 600; }
-  .result-dist { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-
-  /* Map */
-  #map {
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    height: 100%;
-  }
-
-  /* Schedule section */
-  .schedule-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 24px;
-    color: var(--text-muted);
-    font-size: 12px;
-  }
-
-  .empty-state .icon { font-size: 32px; margin-bottom: 8px; }
-
-  .tabs {
-    display: flex;
-    gap: 2px;
-    background: var(--surface2);
-    border-radius: 8px;
-    padding: 3px;
-    margin-bottom: 16px;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 7px;
-    border-radius: 6px;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'Noto Sans KR', sans-serif;
-    transition: all .2s;
-  }
-
-  .tab.active { background: var(--surface); color: var(--text); }
-
-  .info-box {
-    background: rgba(59,130,246,0.08);
-    border: 1px solid rgba(59,130,246,0.2);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 12px;
-    color: #93bbff;
-    line-height: 1.6;
-    margin-bottom: 14px;
-  }
-
-  .total-dist {
-    background: rgba(16,185,129,0.1);
-    border: 1px solid rgba(16,185,129,0.2);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: var(--success);
-    font-weight: 700;
-    text-align: center;
-    margin-top: 10px;
-  }
-
-  .section-title {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+:root{--bg:#0a0e1a;--surface:#111827;--surface2:#1a2235;--border:#1e2d45;--accent:#3b82f6;--accent2:#06b6d4;--gold:#f59e0b;--text:#e2e8f0;--text-muted:#64748b;--success:#10b981;--danger:#ef4444}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.logo{padding:28px 24px 20px;border-bottom:1px solid var(--border)}
+.logo-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 8px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.logo h1{font-size:16px;font-weight:700;line-height:1.4}
+.logo p{font-size:11px;color:var(--text-muted);margin-top:2px}
+nav{padding:16px 12px;flex:1}
+.nav-section{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);padding:12px 12px 6px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-muted);transition:all .2s;margin-bottom:2px}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(59,130,246,0.15);color:var(--accent)}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+.nav-item .badge{margin-left:auto;background:var(--accent);color:white;font-size:10px;padding:1px 6px;border-radius:10px}
+.sidebar-footer{padding:16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);text-align:center}
+.main{margin-left:220px;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:16px;font-weight:700}
+.topbar-date{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted)}
+.content{padding:32px}
+.page{display:none}
+.page.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.stat-label{font-size:11px;color:var(--text-muted);font-weight:500}
+.stat-value{font-size:28px;font-weight:900;margin:8px 0 4px;font-family:'DM Mono',monospace}
+.stat-sub{font-size:11px;color:var(--success)}
+.welcome-banner{background:linear-gradient(135deg,#1e3a5f 0%,#0f2042 100%);border:1px solid #2a4a7f;border-radius:16px;padding:32px;margin-bottom:24px;position:relative;overflow:hidden}
+.welcome-banner::after{content:'📋';position:absolute;right:32px;top:50%;transform:translateY(-50%);font-size:64px;opacity:.2}
+.welcome-banner h2{font-size:22px;font-weight:700;margin-bottom:8px}
+.welcome-banner p{color:#93bbff;font-size:14px;line-height:1.6}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:all .25s}
+.tool-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 32px rgba(59,130,246,.15)}
+.tool-icon{font-size:32px;margin-bottom:12px}
+.tool-card h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.tool-card p{font-size:12px;color:var(--text-muted);line-height:1.5}
+.tool-status{display:inline-block;margin-top:12px;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600}
+.tool-status.ready{background:rgba(16,185,129,.15);color:var(--success)}
+.tool-status.soon{background:rgba(245,158,11,.15);color:var(--gold)}
+.route-layout{display:grid;grid-template-columns:380px 1fr;gap:20px;height:calc(100vh - 160px)}
+.route-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+.panel-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-body{padding:16px 20px;overflow-y:auto;flex:1}
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;margin-bottom:6px;display:block;text-transform:uppercase}
+.form-input,.form-select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Noto Sans KR',sans-serif;transition:border-color .2s}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--accent)}
+.form-input::placeholder{color:var(--text-muted)}
+.btn{padding:10px 16px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#2563eb}
+.btn-success{background:var(--success);color:white}
+.btn-success:hover{background:#059669}
+.btn-danger-ghost{background:transparent;color:var(--danger);border:none;padding:4px 8px;font-size:11px;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.btn-full{width:100%;justify-content:center}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.agency-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.agency-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.agency-info{flex:1;min-width:0}
+.agency-name{font-size:13px;font-weight:600}
+.agency-addr{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.result-header{background:rgba(59,130,246,.1);border-bottom:1px solid var(--border);padding:12px 16px;font-size:12px;font-weight:700;color:var(--accent)}
+.result-item{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;font-size:13px}
+.result-item:last-child{border-bottom:none}
+.result-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.num-start{background:var(--gold);color:#000}
+.num-route{background:var(--accent);color:white}
+.result-info{flex:1}
+.result-name{font-weight:600}
+.result-dist{font-size:11px;color:var(--text-muted);margin-top:1px}
+#map{border-radius:12px;border:1px solid var(--border);height:100%;overflow:hidden}
+.total-dist{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--success);font-weight:700;text-align:center;margin-top:10px}
+.info-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:12px;font-size:12px;color:#93bbff;line-height:1.6;margin-bottom:14px}
+.empty-state{text-align:center;padding:24px;color:var(--text-muted);font-size:12px}
+.empty-state .icon{font-size:32px;margin-bottom:8px}
+.addr-wrapper{position:relative}
+.addr-results{position:absolute;top:100%;left:0;right:0;background:#1e2d45;border:1px solid var(--accent);border-radius:8px;margin-top:4px;z-index:999;max-height:200px;overflow-y:auto;display:none}
+.addr-results.show{display:block}
+.addr-result-item{padding:10px 14px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+.addr-result-item:last-child{border-bottom:none}
+.addr-result-item:hover{background:rgba(59,130,246,.15)}
+.addr-result-item .road{font-weight:600;color:var(--text)}
+.addr-result-item .jibun{font-size:11px;color:var(--text-muted);margin-top:2px}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="logo">
     <div class="logo-badge">GA PORTAL</div>
@@ -539,524 +116,334 @@
   </div>
   <nav>
     <div class="nav-section">메뉴</div>
-    <div class="nav-item active" onclick="showPage('dashboard')">
-      <span class="icon">🏠</span> 홈 대시보드
-    </div>
-    <div class="nav-item" onclick="showPage('route')">
-      <span class="icon">🗺️</span> 방문 동선 최적화
-      <span class="badge">NEW</span>
-    </div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">🏠</span> 홈 대시보드</div>
+    <div class="nav-item" onclick="showPage('route')"><span class="icon">🗺️</span> 방문 동선 최적화<span class="badge">NEW</span></div>
     <div class="nav-section">준비 중</div>
-    <div class="nav-item" style="opacity:.45">
-      <span class="icon">📊</span> 실적 대시보드
-    </div>
-    <div class="nav-item" style="opacity:.45">
-      <span class="icon">👥</span> 설계사 관리
-    </div>
-    <div class="nav-item" style="opacity:.45">
-      <span class="icon">📄</span> 보고서 자동화
-    </div>
-    <div class="nav-item" style="opacity:.45">
-      <span class="icon">📋</span> 상품 비교 툴
-    </div>
+    <div class="nav-item" style="opacity:.45"><span class="icon">📊</span> 실적 대시보드</div>
+    <div class="nav-item" style="opacity:.45"><span class="icon">👥</span> 설계사 관리</div>
+    <div class="nav-item" style="opacity:.45"><span class="icon">📄</span> 보고서 자동화</div>
+    <div class="nav-item" style="opacity:.45"><span class="icon">📋</span> 상품 비교 툴</div>
   </nav>
-  <div class="sidebar-footer">
-    v1.0 · GA 지점장 업무포털
-  </div>
+  <div class="sidebar-footer">v1.1 · 카카오지도 적용</div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
   <div class="topbar">
     <div class="topbar-title" id="pageTitle">🏠 홈 대시보드</div>
     <div class="topbar-date" id="topbarDate"></div>
   </div>
-
   <div class="content">
 
-    <!-- DASHBOARD PAGE -->
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-
       <div class="welcome-banner">
         <h2>👋 GA 지점장 업무 포털에 오신 것을 환영합니다</h2>
         <p>대리점 방문 동선 최적화부터 실적 관리까지,<br>GA 채널 영업을 더 스마트하게 관리하세요.</p>
       </div>
-
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">담당 대리점</div>
-          <div class="stat-value" id="stat-agencies">0</div>
-          <div class="stat-sub">등록된 대리점 수</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">이번 달 교육 일정</div>
-          <div class="stat-value" id="stat-edu">0</div>
-          <div class="stat-sub">교육 예정 건수</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">최적화 실행</div>
-          <div class="stat-value" id="stat-opt">0</div>
-          <div class="stat-sub">동선 최적화 횟수</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">절약 예상 거리</div>
-          <div class="stat-value" id="stat-km">0<span style="font-size:14px">km</span></div>
-          <div class="stat-sub">누적 절약 거리</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">담당 대리점</div><div class="stat-value" id="stat-agencies">0</div><div class="stat-sub">등록된 대리점 수</div></div>
+        <div class="stat-card"><div class="stat-label">이번 달 교육 일정</div><div class="stat-value" id="stat-edu">0</div><div class="stat-sub">교육 예정 건수</div></div>
+        <div class="stat-card"><div class="stat-label">최적화 실행</div><div class="stat-value" id="stat-opt">0</div><div class="stat-sub">동선 최적화 횟수</div></div>
+        <div class="stat-card"><div class="stat-label">절약 예상 거리</div><div class="stat-value" id="stat-km">0<span style="font-size:14px">km</span></div><div class="stat-sub">누적 절약 거리</div></div>
       </div>
-
-      <div style="margin-bottom: 16px; font-size: 14px; font-weight: 700; color: var(--text-muted);">🛠️ 업무 툴</div>
+      <div style="margin-bottom:16px;font-size:14px;font-weight:700;color:var(--text-muted)">🛠️ 업무 툴</div>
       <div class="tools-grid">
-        <div class="tool-card" onclick="showPage('route')">
-          <div class="tool-icon">🗺️</div>
-          <h3>방문 동선 최적화</h3>
-          <p>교육 일정 기반으로 주변 미방문 대리점을 가장 효율적인 순서로 방문 경로를 자동 생성합니다.</p>
-          <span class="tool-status ready">✓ 사용 가능</span>
-        </div>
-        <div class="tool-card" style="opacity:.5; cursor:default">
-          <div class="tool-icon">📊</div>
-          <h3>실적 대시보드</h3>
-          <p>GA별, 설계사별 자사 상품 판매 실적을 한눈에 파악하고 경쟁사 대비 점유율을 분석합니다.</p>
-          <span class="tool-status soon">⏳ 준비 중</span>
-        </div>
-        <div class="tool-card" style="opacity:.5; cursor:default">
-          <div class="tool-icon">👥</div>
-          <h3>설계사 관리 CRM</h3>
-          <p>담당 설계사별 접촉 이력, 미팅 기록을 관리하고 정기 컨택 알림을 설정합니다.</p>
-          <span class="tool-status soon">⏳ 준비 중</span>
-        </div>
-        <div class="tool-card" style="opacity:.5; cursor:default">
-          <div class="tool-icon">📋</div>
-          <h3>상품 비교 툴</h3>
-          <p>자사 상품과 경쟁사 상품을 비교하여 설계사가 현장에서 바로 활용할 수 있는 비교표를 생성합니다.</p>
-          <span class="tool-status soon">⏳ 준비 중</span>
-        </div>
-        <div class="tool-card" style="opacity:.5; cursor:default">
-          <div class="tool-icon">📄</div>
-          <h3>보고서 자동화</h3>
-          <p>본사 보고용 GA 채널 실적 리포트를 자동으로 생성하고 PDF로 출력합니다.</p>
-          <span class="tool-status soon">⏳ 준비 중</span>
-        </div>
-        <div class="tool-card" style="opacity:.5; cursor:default">
-          <div class="tool-icon">🧮</div>
-          <h3>보험료 계산기</h3>
-          <p>고객 조건 입력 시 보험료를 즉시 산출, 설계사가 현장에서 바로 활용 가능합니다.</p>
-          <span class="tool-status soon">⏳ 준비 중</span>
-        </div>
+        <div class="tool-card" onclick="showPage('route')"><div class="tool-icon">🗺️</div><h3>방문 동선 최적화</h3><p>교육 일정 기반으로 주변 미방문 대리점을 가장 효율적인 순서로 방문 경로를 자동 생성합니다.</p><span class="tool-status ready">✓ 사용 가능</span></div>
+        <div class="tool-card" style="opacity:.5;cursor:default"><div class="tool-icon">📊</div><h3>실적 대시보드</h3><p>GA별, 설계사별 자사 상품 판매 실적을 한눈에 파악하고 경쟁사 대비 점유율을 분석합니다.</p><span class="tool-status soon">⏳ 준비 중</span></div>
+        <div class="tool-card" style="opacity:.5;cursor:default"><div class="tool-icon">👥</div><h3>설계사 관리 CRM</h3><p>담당 설계사별 접촉 이력, 미팅 기록을 관리하고 정기 컨택 알림을 설정합니다.</p><span class="tool-status soon">⏳ 준비 중</span></div>
+        <div class="tool-card" style="opacity:.5;cursor:default"><div class="tool-icon">📋</div><h3>상품 비교 툴</h3><p>자사 상품과 경쟁사 상품을 비교하여 설계사가 현장에서 바로 활용할 수 있는 비교표를 생성합니다.</p><span class="tool-status soon">⏳ 준비 중</span></div>
+        <div class="tool-card" style="opacity:.5;cursor:default"><div class="tool-icon">📄</div><h3>보고서 자동화</h3><p>본사 보고용 GA 채널 실적 리포트를 자동으로 생성하고 PDF로 출력합니다.</p><span class="tool-status soon">⏳ 준비 중</span></div>
+        <div class="tool-card" style="opacity:.5;cursor:default"><div class="tool-icon">🧮</div><h3>보험료 계산기</h3><p>고객 조건 입력 시 보험료를 즉시 산출, 설계사가 현장에서 바로 활용 가능합니다.</p><span class="tool-status soon">⏳ 준비 중</span></div>
       </div>
     </div>
 
-    <!-- ROUTE PAGE -->
+    <!-- ROUTE -->
     <div class="page" id="page-route">
-
       <div class="route-layout">
-        <!-- LEFT PANEL -->
-        <div style="display:flex;flex-direction:column;gap:16px;overflow-y:auto;">
+        <div style="display:flex;flex-direction:column;gap:16px;overflow-y:auto">
 
-          <!-- 대리점 등록 -->
           <div class="route-panel" style="flex-shrink:0">
-            <div class="panel-header">
-              📍 대리점 등록
-              <span style="font-size:11px;color:var(--text-muted);font-weight:400" id="agency-count-label">0개 등록</span>
-            </div>
+            <div class="panel-header">📍 대리점 등록<span style="font-size:11px;color:var(--text-muted);font-weight:400" id="agency-count-label">0개 등록</span></div>
             <div class="panel-body">
-              <div class="info-box">
-                💡 담당 대리점을 먼저 등록하세요. 주소를 입력하면 지도에 자동으로 표시됩니다.
-              </div>
+              <div class="info-box">💡 대리점명과 주소를 입력하세요. 카카오 주소 검색으로 정확한 위치가 지도에 표시됩니다.</div>
               <div class="form-group">
                 <label class="form-label">대리점명</label>
                 <input class="form-input" id="agencyName" placeholder="예: GAK-영등포" />
               </div>
               <div class="form-group">
-                <label class="form-label">주소</label>
-                <input class="form-input" id="agencyAddr" placeholder="예: 서울 영등포구 여의대로 24" />
-              </div>
-              <button class="btn btn-primary btn-full" onclick="addAgency()">➕ 대리점 추가</button>
-
-              <hr class="divider">
-
-              <div id="agencyList">
-                <div class="empty-state">
-                  <div class="icon">🏢</div>
-                  대리점을 추가해주세요
+                <label class="form-label">주소 검색</label>
+                <div class="addr-wrapper">
+                  <input class="form-input" id="agencyAddr" placeholder="도로명 또는 지번 주소 입력..." autocomplete="off" oninput="onAddrInput()" />
+                  <div class="addr-results" id="addrResults"></div>
                 </div>
               </div>
+              <div id="selectedAddrBox" style="display:none;margin-bottom:12px">
+                <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--success)">✅ <span id="selectedAddrText"></span></div>
+              </div>
+              <button class="btn btn-primary btn-full" onclick="addAgency()">➕ 대리점 추가</button>
+              <hr class="divider">
+              <div id="agencyList"><div class="empty-state"><div class="icon">🏢</div>대리점을 추가해주세요</div></div>
             </div>
           </div>
 
-          <!-- 교육 일정 입력 -->
           <div class="route-panel" style="flex-shrink:0">
-            <div class="panel-header">
-              📅 교육 일정 & 동선 최적화
-            </div>
+            <div class="panel-header">📅 교육 일정 & 동선 최적화</div>
             <div class="panel-body">
-              <div class="form-group">
-                <label class="form-label">교육 날짜</label>
-                <input class="form-input" id="eduDate" type="date" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">교육 대리점 선택</label>
-                <select class="form-select" id="eduAgency">
-                  <option value="">대리점을 먼저 등록하세요</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">추가 방문 수 (교육 후)</label>
-                <select class="form-select" id="visitCount">
-                  <option value="2">2곳</option>
-                  <option value="3" selected>3곳</option>
-                  <option value="4">4곳</option>
-                  <option value="5">5곳</option>
-                </select>
-              </div>
+              <div class="form-group"><label class="form-label">교육 날짜</label><input class="form-input" id="eduDate" type="date" /></div>
+              <div class="form-group"><label class="form-label">교육 대리점</label><select class="form-select" id="eduAgency"><option value="">대리점을 먼저 등록하세요</option></select></div>
+              <div class="form-group"><label class="form-label">추가 방문 수</label><select class="form-select" id="visitCount"><option value="2">2곳</option><option value="3" selected>3곳</option><option value="4">4곳</option><option value="5">5곳</option></select></div>
               <button class="btn btn-success btn-full" onclick="optimizeRoute()">🚀 최적 동선 계산</button>
-
               <div id="routeResult" style="margin-top:14px"></div>
             </div>
           </div>
 
         </div>
-
-        <!-- MAP -->
         <div id="map"></div>
       </div>
-
     </div>
+
   </div>
 </div>
 
 <script>
-// ── STATE ──
-let agencies = [];
-let map, markers = [], routeLine;
-let stats = { opt: 0, km: 0 };
+let agencies=[], map, markers=[], routePolyline, stats={opt:0,km:0}, selectedAddr=null, geocoder, addrSearchTimer=null;
+const COLORS=['#f59e0b','#3b82f6','#10b981','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
 
-const COLORS = ['#f59e0b','#3b82f6','#10b981','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
-
-// ── INIT ──
-window.onload = () => {
+window.onload=()=>{
   updateDate();
-  setInterval(updateDate, 60000);
+  setInterval(updateDate,60000);
   loadFromStorage();
-  initMap();
-
-  // default date
-  const today = new Date();
-  document.getElementById('eduDate').value = today.toISOString().split('T')[0];
+  document.getElementById('eduDate').value=new Date().toISOString().split('T')[0];
 };
 
-function updateDate() {
-  const now = new Date();
-  const opts = { year:'numeric', month:'long', day:'numeric', weekday:'long' };
-  document.getElementById('topbarDate').textContent = now.toLocaleDateString('ko-KR', opts);
+function updateDate(){
+  document.getElementById('topbarDate').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 }
 
-function loadFromStorage() {
-  const saved = localStorage.getItem('ga_agencies');
-  if (saved) { agencies = JSON.parse(saved); renderAgencyList(); updateEduSelect(); }
-  const savedStats = localStorage.getItem('ga_stats');
-  if (savedStats) { stats = JSON.parse(savedStats); }
+function loadFromStorage(){
+  try{
+    const s=localStorage.getItem('ga_agencies'); if(s){agencies=JSON.parse(s);renderAgencyList();updateEduSelect();}
+    const st=localStorage.getItem('ga_stats'); if(st)stats=JSON.parse(st);
+  }catch(e){}
   updateDashStats();
 }
 
-function saveAgencies() {
-  localStorage.setItem('ga_agencies', JSON.stringify(agencies));
-  localStorage.setItem('ga_stats', JSON.stringify(stats));
+function saveAgencies(){
+  localStorage.setItem('ga_agencies',JSON.stringify(agencies));
+  localStorage.setItem('ga_stats',JSON.stringify(stats));
 }
 
-// ── MAP ──
-function initMap() {
-  map = L.map('map').setView([37.5665, 126.9780], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 18
-  }).addTo(map);
+function initKakaoMap(){
+  map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(37.5665,126.9780),level:7});
+  map.addControl(new kakao.maps.ZoomControl(),kakao.maps.ControlPosition.RIGHT);
+  map.addControl(new kakao.maps.MapTypeControl(),kakao.maps.ControlPosition.TOPRIGHT);
+  geocoder=new kakao.maps.services.Geocoder();
+  agencies.forEach((a,i)=>{if(a.lat)addMarkerToMap(a,i,(i+1).toString());});
 }
 
-function clearMapMarkers() {
-  markers.forEach(m => m.remove());
-  markers = [];
-  if (routeLine) { routeLine.remove(); routeLine = null; }
+function clearMapMarkers(){
+  markers.forEach(m=>m.setMap(null));
+  markers=[];
+  if(routePolyline){routePolyline.setMap(null);routePolyline=null;}
 }
 
-function addMarkerToMap(agency, colorIdx, label) {
-  if (!agency.lat) return;
-  const color = COLORS[colorIdx % COLORS.length];
-  const icon = L.divIcon({
-    html: `<div style="
-      background:${color};color:white;border-radius:50%;
-      width:32px;height:32px;display:flex;align-items:center;
-      justify-content:center;font-size:12px;font-weight:700;
-      border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);
-      ">${label}</div>`,
-    className: '',
-    iconSize: [32,32],
-    iconAnchor: [16,16]
+function addMarkerToMap(agency,colorIdx,label){
+  if(!agency.lat)return;
+  const color=COLORS[colorIdx%COLORS.length];
+  const overlay=new kakao.maps.CustomOverlay({
+    position:new kakao.maps.LatLng(agency.lat,agency.lng),
+    content:`<div style="background:${color};color:white;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,.35)">${label}</div>`,
+    yAnchor:0.5
   });
-  const m = L.marker([agency.lat, agency.lng], { icon })
-    .addTo(map)
-    .bindPopup(`<b>${agency.name}</b><br>${agency.address}`);
-  markers.push(m);
+  overlay.setMap(map);
+  markers.push(overlay);
 }
 
-// ── GEOCODING ──
-async function geocode(address) {
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address + ' 대한민국')}&format=json&limit=1`;
-    const res = await fetch(url, { headers: { 'Accept-Language':'ko' } });
-    const data = await res.json();
-    if (data && data.length > 0) {
-      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+function onAddrInput(){
+  const q=document.getElementById('agencyAddr').value.trim();
+  selectedAddr=null;
+  document.getElementById('selectedAddrBox').style.display='none';
+  clearTimeout(addrSearchTimer);
+  if(!q||q.length<2){closeAddrResults();return;}
+  addrSearchTimer=setTimeout(()=>searchAddress(q),400);
+}
+
+function searchAddress(query){
+  if(!geocoder)return;
+  geocoder.addressSearch(query,(result,status)=>{
+    if(status===kakao.maps.services.Status.OK&&result.length>0){showAddrResults(result);}
+    else{
+      const ps=new kakao.maps.services.Places();
+      ps.keywordSearch(query,(r,s)=>{
+        if(s===kakao.maps.services.Status.OK)showAddrResultsFromPlaces(r);
+        else closeAddrResults();
+      });
     }
-  } catch(e) {}
-  return null;
-}
-
-// ── ADD AGENCY ──
-async function addAgency() {
-  const name = document.getElementById('agencyName').value.trim();
-  const addr = document.getElementById('agencyAddr').value.trim();
-  if (!name || !addr) { alert('대리점명과 주소를 모두 입력해주세요.'); return; }
-
-  const btn = document.querySelector('button[onclick="addAgency()"]');
-  btn.textContent = '📍 위치 검색 중...';
-  btn.disabled = true;
-
-  const coords = await geocode(addr);
-
-  const agency = {
-    id: Date.now(),
-    name,
-    address: addr,
-    lat: coords?.lat || null,
-    lng: coords?.lng || null,
-    addedAt: new Date().toISOString()
-  };
-
-  agencies.push(agency);
-  saveAgencies();
-  renderAgencyList();
-  updateEduSelect();
-  updateDashStats();
-
-  document.getElementById('agencyName').value = '';
-  document.getElementById('agencyAddr').value = '';
-  btn.textContent = '➕ 대리점 추가';
-  btn.disabled = false;
-
-  // Add to map
-  if (coords) {
-    clearMapMarkers();
-    agencies.forEach((a, i) => {
-      if (a.lat) addMarkerToMap(a, i, (i+1).toString());
-    });
-    map.setView([coords.lat, coords.lng], 13);
-  } else {
-    alert('⚠️ 주소를 지도에서 찾을 수 없었습니다. 대리점은 등록되었지만 지도에 표시되지 않을 수 있어요.');
-  }
-}
-
-function removeAgency(id) {
-  agencies = agencies.filter(a => a.id !== id);
-  saveAgencies();
-  renderAgencyList();
-  updateEduSelect();
-  updateDashStats();
-  clearMapMarkers();
-  agencies.forEach((a, i) => {
-    if (a.lat) addMarkerToMap(a, i, (i+1).toString());
   });
 }
 
-function renderAgencyList() {
-  const el = document.getElementById('agencyList');
-  document.getElementById('agency-count-label').textContent = `${agencies.length}개 등록`;
+function showAddrResults(results){
+  const box=document.getElementById('addrResults');
+  box.innerHTML=results.slice(0,5).map(r=>`
+    <div class="addr-result-item" onclick="selectAddr('${encodeURIComponent(r.road_address?.address_name||r.address_name)}','${encodeURIComponent(r.address_name)}',${r.y},${r.x})">
+      <div class="road">${r.road_address?.address_name||r.address_name}</div>
+      ${r.road_address?`<div class="jibun">지번: ${r.address_name}</div>`:''}
+    </div>`).join('');
+  box.classList.add('show');
+}
 
-  if (agencies.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">🏢</div>대리점을 추가해주세요</div>`;
-    return;
-  }
+function showAddrResultsFromPlaces(results){
+  const box=document.getElementById('addrResults');
+  box.innerHTML=results.slice(0,5).map(r=>`
+    <div class="addr-result-item" onclick="selectAddr('${encodeURIComponent(r.place_name+' '+r.road_address_name)}','${encodeURIComponent(r.address_name)}',${r.y},${r.x})">
+      <div class="road">${r.place_name}</div>
+      <div class="jibun">${r.road_address_name||r.address_name}</div>
+    </div>`).join('');
+  box.classList.add('show');
+}
 
-  el.innerHTML = agencies.map((a, i) => `
+function selectAddr(road,jibun,lat,lng){
+  const r=decodeURIComponent(road);
+  selectedAddr={road:r,jibun:decodeURIComponent(jibun),lat:parseFloat(lat),lng:parseFloat(lng)};
+  document.getElementById('agencyAddr').value=r;
+  document.getElementById('selectedAddrText').textContent=r;
+  document.getElementById('selectedAddrBox').style.display='block';
+  closeAddrResults();
+  if(map){map.setCenter(new kakao.maps.LatLng(parseFloat(lat),parseFloat(lng)));map.setLevel(5);}
+}
+
+function closeAddrResults(){document.getElementById('addrResults').classList.remove('show');}
+document.addEventListener('click',e=>{if(!e.target.closest('.addr-wrapper'))closeAddrResults();});
+
+function addAgency(){
+  const name=document.getElementById('agencyName').value.trim();
+  if(!name){alert('대리점명을 입력해주세요.');return;}
+  if(!selectedAddr){alert('주소를 검색해서 선택해주세요.');return;}
+  const agency={id:Date.now(),name,address:selectedAddr.road,lat:selectedAddr.lat,lng:selectedAddr.lng,addedAt:new Date().toISOString()};
+  agencies.push(agency);
+  saveAgencies();renderAgencyList();updateEduSelect();updateDashStats();
+  const idx=agencies.length-1;
+  addMarkerToMap(agency,idx,(idx+1).toString());
+  map.setCenter(new kakao.maps.LatLng(agency.lat,agency.lng));
+  document.getElementById('agencyName').value='';
+  document.getElementById('agencyAddr').value='';
+  document.getElementById('selectedAddrBox').style.display='none';
+  selectedAddr=null;
+}
+
+function removeAgency(id){
+  agencies=agencies.filter(a=>a.id!==id);
+  saveAgencies();renderAgencyList();updateEduSelect();updateDashStats();
+  clearMapMarkers();
+  agencies.forEach((a,i)=>{if(a.lat)addMarkerToMap(a,i,(i+1).toString());});
+}
+
+function renderAgencyList(){
+  document.getElementById('agency-count-label').textContent=`${agencies.length}개 등록`;
+  const el=document.getElementById('agencyList');
+  if(agencies.length===0){el.innerHTML=`<div class="empty-state"><div class="icon">🏢</div>대리점을 추가해주세요</div>`;return;}
+  el.innerHTML=agencies.map((a,i)=>`
     <div class="agency-item">
-      <div class="agency-dot" style="background:${COLORS[i % COLORS.length]}"></div>
-      <div class="agency-info">
-        <div class="agency-name">${a.name}</div>
-        <div class="agency-addr">${a.address}</div>
-      </div>
-      ${a.lat ? '<span style="font-size:16px">📍</span>' : '<span title="위치 미확인" style="font-size:16px;opacity:.4">❓</span>'}
-      <button class="btn btn-danger-ghost" onclick="removeAgency(${a.id})">✕</button>
-    </div>
-  `).join('');
+      <div class="agency-dot" style="background:${COLORS[i%COLORS.length]}"></div>
+      <div class="agency-info"><div class="agency-name">${a.name}</div><div class="agency-addr">${a.address}</div></div>
+      <button class="btn-danger-ghost" onclick="removeAgency(${a.id})">✕</button>
+    </div>`).join('');
 }
 
-function updateEduSelect() {
-  const sel = document.getElementById('eduAgency');
-  if (agencies.length === 0) {
-    sel.innerHTML = '<option value="">대리점을 먼저 등록하세요</option>';
-    return;
-  }
-  sel.innerHTML = '<option value="">교육 대리점 선택...</option>' +
-    agencies.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+function updateEduSelect(){
+  const sel=document.getElementById('eduAgency');
+  if(agencies.length===0){sel.innerHTML='<option value="">대리점을 먼저 등록하세요</option>';return;}
+  sel.innerHTML='<option value="">교육 대리점 선택...</option>'+agencies.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
 }
 
-// ── DISTANCE ──
-function haversine(a, b) {
-  const R = 6371;
-  const dLat = (b.lat - a.lat) * Math.PI / 180;
-  const dLng = (b.lng - a.lng) * Math.PI / 180;
-  const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+function haversine(a,b){
+  const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
-// ── NEAREST NEIGHBOR TSP ──
-function nearestNeighbor(start, candidates, maxVisit) {
-  const visited = [];
-  let current = start;
-  const pool = [...candidates];
-
-  while (visited.length < maxVisit && pool.length > 0) {
-    let minDist = Infinity, minIdx = -1;
-    pool.forEach((a, i) => {
-      if (!a.lat) return;
-      const d = haversine(current, a);
-      if (d < minDist) { minDist = d; minIdx = i; }
-    });
-    if (minIdx === -1) break;
-    visited.push({ agency: pool[minIdx], dist: minDist });
-    current = pool[minIdx];
-    pool.splice(minIdx, 1);
+function nearestNeighbor(start,candidates,maxVisit){
+  const visited=[];let current=start;const pool=[...candidates];
+  while(visited.length<maxVisit&&pool.length>0){
+    let minDist=Infinity,minIdx=-1;
+    pool.forEach((a,i)=>{if(!a.lat)return;const d=haversine(current,a);if(d<minDist){minDist=d;minIdx=i;}});
+    if(minIdx===-1)break;
+    visited.push({agency:pool[minIdx],dist:minDist});
+    current=pool[minIdx];pool.splice(minIdx,1);
   }
   return visited;
 }
 
-// ── OPTIMIZE ──
-function optimizeRoute() {
-  const dateVal = document.getElementById('eduDate').value;
-  const eduId = parseInt(document.getElementById('eduAgency').value);
-  const visitCount = parseInt(document.getElementById('visitCount').value);
+function optimizeRoute(){
+  const dateVal=document.getElementById('eduDate').value;
+  const eduId=parseInt(document.getElementById('eduAgency').value);
+  const visitCount=parseInt(document.getElementById('visitCount').value);
+  if(!dateVal){alert('날짜를 선택해주세요.');return;}
+  if(!eduId){alert('교육 대리점을 선택해주세요.');return;}
+  const eduAgency=agencies.find(a=>a.id===eduId);
+  if(!eduAgency||!eduAgency.lat){alert('교육 대리점 위치 정보가 없습니다.');return;}
+  const others=agencies.filter(a=>a.id!==eduId&&a.lat);
+  if(others.length===0){alert('방문할 다른 대리점이 없습니다.');return;}
 
-  if (!dateVal) { alert('날짜를 선택해주세요.'); return; }
-  if (!eduId) { alert('교육 대리점을 선택해주세요.'); return; }
+  const route=nearestNeighbor(eduAgency,others,visitCount);
+  let totalDist=0;
+  route.forEach((r,i)=>{const from=i===0?eduAgency:route[i-1].agency;totalDist+=haversine(from,r.agency);});
 
-  const eduAgency = agencies.find(a => a.id === eduId);
-  if (!eduAgency || !eduAgency.lat) {
-    alert('교육 대리점 위치 정보가 없습니다. 주소를 다시 확인해주세요.');
-    return;
-  }
+  stats.opt++;stats.km=Math.round((stats.km||0)+totalDist);
+  saveAgencies();updateDashStats();
 
-  const others = agencies.filter(a => a.id !== eduId && a.lat);
-  if (others.length === 0) {
-    alert('방문할 다른 대리점이 없습니다. 대리점을 더 추가해주세요.');
-    return;
-  }
-
-  const route = nearestNeighbor(eduAgency, others, visitCount);
-  const totalDist = route.reduce((s, r) => s + r.dist, 0) +
-    (route.length > 0 ? haversine(eduAgency, route[0].agency) : 0);
-
-  // stats
-  stats.opt++;
-  stats.km += Math.round(totalDist);
-  saveAgencies();
-  updateDashStats();
-
-  // render result
-  const dateStr = new Date(dateVal).toLocaleDateString('ko-KR', { month:'long', day:'numeric', weekday:'short' });
-  let html = `
-    <div class="result-box">
-      <div class="result-header">📅 ${dateStr} 최적 방문 동선</div>
-      <div class="result-item">
-        <div class="result-num num-start">출</div>
-        <div class="result-info">
-          <div class="result-name">⭐ ${eduAgency.name}</div>
-          <div class="result-dist">교육 대리점 (출발점)</div>
-        </div>
-      </div>
-  `;
-
-  route.forEach((r, i) => {
-    html += `
-      <div class="result-item">
-        <div class="result-num num-route">${i+1}</div>
-        <div class="result-info">
-          <div class="result-name">${r.agency.name}</div>
-          <div class="result-dist">이전 위치에서 약 ${r.dist.toFixed(1)}km</div>
-        </div>
-      </div>
-    `;
+  const dateStr=new Date(dateVal).toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
+  let html=`<div class="result-box"><div class="result-header">📅 ${dateStr} 최적 방문 동선</div>
+    <div class="result-item"><div class="result-num num-start">출</div><div class="result-info"><div class="result-name">⭐ ${eduAgency.name}</div><div class="result-dist">교육 대리점 (출발점)</div></div></div>`;
+  route.forEach((r,i)=>{
+    const from=i===0?eduAgency:route[i-1].agency;
+    const d=haversine(from,r.agency);
+    html+=`<div class="result-item"><div class="result-num num-route">${i+1}</div><div class="result-info"><div class="result-name">${r.agency.name}</div><div class="result-dist">이전 위치에서 약 ${d.toFixed(1)}km</div></div></div>`;
   });
+  html+=`</div><div class="total-dist">🚗 총 이동 거리 약 ${totalDist.toFixed(1)}km</div>`;
+  document.getElementById('routeResult').innerHTML=html;
 
-  html += `</div>
-    <div class="total-dist">🚗 총 이동 거리 약 ${totalDist.toFixed(1)}km</div>
-  `;
-
-  document.getElementById('routeResult').innerHTML = html;
-
-  // Map update
   clearMapMarkers();
-  const allStops = [eduAgency, ...route.map(r => r.agency)];
-  const latlngs = [];
-
-  allStops.forEach((a, i) => {
-    const label = i === 0 ? '★' : i.toString();
-    const colorIdx = i === 0 ? 0 : i;
-    addMarkerToMap(a, colorIdx, label);
-    if (a.lat) latlngs.push([a.lat, a.lng]);
+  const allStops=[eduAgency,...route.map(r=>r.agency)];
+  const path=[];
+  allStops.forEach((a,i)=>{
+    addMarkerToMap(a,i,i===0?'★':i.toString());
+    if(a.lat)path.push(new kakao.maps.LatLng(a.lat,a.lng));
   });
-
-  if (latlngs.length > 1) {
-    routeLine = L.polyline(latlngs, {
-      color: '#3b82f6',
-      weight: 3,
-      opacity: 0.8,
-      dashArray: '8, 6'
-    }).addTo(map);
-    map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+  if(path.length>1){
+    routePolyline=new kakao.maps.Polyline({path,strokeWeight:4,strokeColor:'#3b82f6',strokeOpacity:.85,strokeStyle:'shortdash'});
+    routePolyline.setMap(map);
+    const bounds=new kakao.maps.LatLngBounds();
+    path.forEach(p=>bounds.extend(p));
+    map.setBounds(bounds,60);
   }
 }
 
-// ── DASHBOARD STATS ──
-function updateDashStats() {
-  document.getElementById('stat-agencies').textContent = agencies.length;
-  document.getElementById('stat-opt').textContent = stats.opt;
-  document.getElementById('stat-km').innerHTML = `${stats.km}<span style="font-size:14px">km</span>`;
+function updateDashStats(){
+  document.getElementById('stat-agencies').textContent=agencies.length;
+  document.getElementById('stat-opt').textContent=stats.opt||0;
+  document.getElementById('stat-km').innerHTML=`${stats.km||0}<span style="font-size:14px">km</span>`;
 }
 
-// ── PAGE NAV ──
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-
-  const titles = { dashboard:'🏠 홈 대시보드', route:'🗺️ 방문 동선 최적화' };
-  document.getElementById('pageTitle').textContent = titles[id] || '';
-
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(n => {
-    if (n.getAttribute('onclick')?.includes(id)) n.classList.add('active');
-  });
-
-  if (id === 'route') {
-    setTimeout(() => map.invalidateSize(), 100);
-    clearMapMarkers();
-    agencies.forEach((a, i) => {
-      if (a.lat) addMarkerToMap(a, i, (i+1).toString());
-    });
-    if (agencies.some(a => a.lat)) {
-      const first = agencies.find(a => a.lat);
-      map.setView([first.lat, first.lng], 12);
-    }
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const titles={dashboard:'🏠 홈 대시보드',route:'🗺️ 방문 동선 최적화'};
+  document.getElementById('pageTitle').textContent=titles[id]||'';
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes(id))n.classList.add('active');});
+  if(id==='route'){
+    setTimeout(()=>{
+      if(!map)initKakaoMap();
+      else kakao.maps.event.trigger(map,'resize');
+    },100);
   }
 }
 </script>
-
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('SW registered'))
-      .catch(e => console.log('SW error', e));
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(e=>console.log('SW error',e));
   });
 }
 </script>
